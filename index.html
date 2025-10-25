@@ -1,151 +1,903 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Toon Man</title>
-  <style>
-    :root{
-      --bg1: #0f0c29;
-      --bg2: #302b63;
-      --accent: #ff2d95;
-      --glass: rgba(255,255,255,0.04);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Toon Boy</title>
+    <style>
+        :root{
+            --bg1: #0f0c29;
+            --bg2: #302b63;
+            --accent: #ff2d95;
+            --glass: rgba(255,255,255,0.04);
+            --control-blue: #3f72af;
+            --control-shadow: #2a507a;
+        }
 
-    /* Page */
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background:
-      radial-gradient(1200px 600px at 10% 10%, rgba(255,45,149,0.06), transparent 8%),
-      radial-gradient(800px 400px at 90% 90%, rgba(50,150,255,0.03), transparent 8%),
-      linear-gradient(135deg, var(--bg1), var(--bg2));
-      background-size: 300% 300%;
-      animation: bgShift 18s ease-in-out infinite;
-      overflow: hidden;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
+        /* Page */
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column; /* Allows stacking canvas and controls */
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background:
+            radial-gradient(1200px 600px at 10% 10%, rgba(255,45,149,0.06), transparent 8%),
+            radial-gradient(800px 400px at 90% 90%, rgba(50,150,255,0.03), transparent 8%),
+            linear-gradient(135deg, var(--bg1), var(--bg2));
+            background-size: 300% 300%;
+            animation: bgShift 18s ease-in-out infinite;
+            overflow: hidden;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+        }
 
-    /* subtle starfield / grain */
-    body::before{
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-      radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.12), transparent),
-      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.07), transparent),
-      radial-gradient(1px 1px at 80% 40%, rgba(255,255,255,0.06), transparent);
-      opacity: 0.08;
-      mix-blend-mode: screen;
-      animation: twinkle 6s linear infinite;
-    }
+        /* subtle starfield / grain */
+        body::before{
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+            radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.12), transparent),
+            radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.07), transparent),
+            radial-gradient(1px 1px at 80% 40%, rgba(255,255,255,0.06), transparent);
+            opacity: 0.08;
+            mix-blend-mode: screen;
+            animation: twinkle 6s linear infinite;
+        }
 
-    /* Canvas styling */
-    canvas {
-      display: block;
-      width: min(92vw, 1100px);
-      height: auto;
-      aspect-ratio: 16 / 9;
-      max-height: calc(100vh - 48px);
-      border-radius: 18px;
-      border: 2px solid rgba(255,255,255,0.06);
-      background:
-      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18)),
-      repeating-linear-gradient(transparent, transparent 6px, rgba(0,0,0,0.06) 7px),
-      linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-      background-blend-mode: overlay, multiply, normal;
-      background-size: cover, 100% 14px, cover;
-      box-shadow:
-      0 20px 40px rgba(2,6,23,0.6),
-      0 0 40px rgba(255,45,149,0.06),
-      inset 0 -8px 40px rgba(0,0,0,0.45);
-      image-rendering: optimizeSpeed;
-      image-rendering: pixelated; /* good for retro sprite art */
-      transform: translateZ(0);
-      transition: transform 240ms cubic-bezier(.2,.9,.2,1), box-shadow 240ms;
-      cursor: crosshair;
-    }
+        /* Canvas styling */
+        canvas {
+            display: block;
+            width: min(92vw, 1100px);
+            height: auto;
+            aspect-ratio: 16 / 9;
+            max-height: calc(100vh - 48px);
+            border-radius: 18px;
+            border: 2px solid rgba(255,255,255,0.06);
+            background:
+            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18)),
+            repeating-linear-gradient(transparent, transparent 6px, rgba(0,0,0,0.06) 7px),
+            linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+            background-blend-mode: overlay, multiply, normal;
+            background-size: cover, 100% 14px, cover;
+            box-shadow:
+            0 20px 40px rgba(2,6,23,0.6),
+            0 0 40px rgba(255,45,149,0.06),
+            inset 0 -8px 40px rgba(0,0,0,0.45);
+            image-rendering: optimizeSpeed;
+            image-rendering: pixelated; /* good for retro sprite art */
+            transform: translateZ(0);
+            transition: transform 240ms cubic-bezier(.2,.9,.2,1), box-shadow 240ms;
+            cursor: crosshair;
+        }
 
-    /* Hover / active */
-    canvas:hover {
-      transform: scale(1.02);
-      box-shadow:
-      0 26px 60px rgba(2,6,23,0.7),
-      0 0 90px rgba(255,45,149,0.14),
-      inset 0 -12px 60px rgba(0,0,0,0.5);
-    }
-    canvas:active {
-      transform: scale(0.995);
-    }
+        /* Hover / active */
+        canvas:hover {
+            transform: scale(1.02);
+            box-shadow:
+            0 26px 60px rgba(2,6,23,0.7),
+            0 0 90px rgba(255,45,149,0.14),
+            inset 0 -12px 60px rgba(0,0,0,0.5);
+        }
+        canvas:active {
+            transform: scale(0.995);
+        }
 
-    /* subtle neon rim when focused (keyboard / accessibility) */
-    canvas:focus {
-      outline: none;
-      box-shadow: 0 0 0 6px rgba(255,45,149,0.06), 0 22px 50px rgba(2,6,23,0.75);
-    }
+        /* subtle neon rim when focused (keyboard / accessibility) */
+        canvas:focus {
+            outline: none;
+            box-shadow: 0 0 0 6px rgba(255,45,149,0.06), 0 22px 50px rgba(2,6,23,0.75);
+        }
 
-    /* Small decorative HUD top-left */
-    body > .hud {
-      position: fixed;
-      left: 18px;
-      top: 18px;
-      color: rgba(255,255,255,0.88);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      font-size: 13px;
-      padding: 6px 10px;
-      border-radius: 8px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
-      border: 1px solid rgba(255,255,255,0.03);
-      backdrop-filter: blur(6px) saturate(120%);
-      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
-      pointer-events: none;
-    }
+        /* Small decorative HUD top-left */
+        /* HUD — frosted neon card with tiny live indicators */
+        body > .hud {
+            position: fixed;
+            left: 18px;
+            top: 18px;
+            z-index: 1001; /* Ensure HUD is on top of controls */
+            pointer-events: none;
 
-    /* Keyframes */
-    @keyframes bgShift {
-      0%   { background-position: 0% 0%; }
-      50%  { background-position: 100% 100%; }
-      100% { background-position: 0% 0%; }
-    }
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.06; transform: translateY(0); }
-      50% { opacity: 0.12; transform: translateY(-2px); }
-    }
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-start;
+
+            padding: 8px 12px;
+            border-radius: 12px;
+            min-width: 120px;
+
+            color: rgba(255,255,255,0.95);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            font-size: 13px;
+            line-height: 1;
+
+            /* layered glass + subtle neon rim */
+            background:
+          linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.16));
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow:
+          0 8px 22px rgba(2,6,23,0.65),
+          0 0 18px rgba(63,114,175,0.03),
+          inset 0 1px 0 rgba(255,255,255,0.02);
+
+            backdrop-filter: blur(6px) saturate(125%);
+            -webkit-backdrop-filter: blur(6px) saturate(125%);
+
+            /* micro motion for life */
+            transform: translateZ(0);
+            transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms, opacity 220ms;
+        }
+
+        /* thin accent stripe and subtle animated sheen */
+        body > .hud::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            background: linear-gradient(180deg, var(--accent), #ff9dcf 60%);
+            box-shadow: 0 0 18px rgba(255,45,149,0.12);
+            pointer-events: none;
+        }
+
+        /* Each stat row */
+        body > .hud > div {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+            opacity: 0.98;
+            -webkit-font-smoothing: antialiased;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* stat name / small label on the left */
+        body > .hud > div:first-child {
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        body > .hud > div:first-child::after {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-left: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #fff, var(--accent));
+            box-shadow: 0 0 10px rgba(255,45,149,0.18);
+            opacity: 0.95;
+        }
+
+        /* stat value chips (right side) */
+        .hud .fps,
+        .hud .time,
+        .hud .score {
+            min-width: 54px;
+            text-align: right;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: "Segoe UI", Roboto, monospace;
+            background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.12));
+            border: 1px solid rgba(255,255,255,0.02);
+            box-shadow: inset 0 -2px 6px rgba(0,0,0,0.25);
+        }
+
+        /* FPS gets a live glow when > 0 */
+        .hud .fps {
+            color: #fff;
+            background-image: linear-gradient(90deg, rgba(63,114,175,0.08), rgba(255,45,149,0.03));
+            box-shadow: 0 6px 18px rgba(63,114,175,0.06), inset 0 -2px 6px rgba(0,0,0,0.28);
+        }
+
+        /* Score uses accent color */
+        .hud .score {
+            color: var(--accent);
+            background: linear-gradient(180deg, rgba(255,45,149,0.03), rgba(0,0,0,0.10));
+            box-shadow: 0 6px 18px rgba(255,45,149,0.06), inset 0 -2px 6px rgba(0,0,0,0.28);
+        }
+
+        /* Small subtle animations for "alive" feeling */
+        @keyframes hudPulse {
+            0%   { transform: translateY(0); opacity: 1; }
+            50%  { transform: translateY(-1px); opacity: 0.98; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .hud .fps { animation: hudPulse 3s ease-in-out infinite; }
+
+        /* responsive tweaks so HUD doesn't crowd small screens */
+        @media (max-width: 480px) {
+            body > .hud {
+          left: 12px;
+          top: 12px;
+          padding: 6px 10px;
+          border-radius: 10px;
+          font-size: 12px;
+            }
+            body > .hud::before { width: 3px; }
+            .hud .fps, .hud .time, .hud .score { min-width: 44px; padding: 3px 6px; border-radius: 6px; }
+        }
+
+        /* Respect reduced-motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .hud, .hud .fps { transition: none; animation: none; }
+            body > .hud { backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+        }
+
+        /* Keyframes */
+        @keyframes bgShift {
+            0%   { background-position: 0% 0%; }
+            50%  { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.06; transform: translateY(0); }
+            50% { opacity: 0.12; transform: translateY(-2px); }
+        }
+
+        /* --- MOBILE CONTROLS STYLES --- */
+
+        /* Mobile Controls Container - Fixed at bottom of screen */
+        .control-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 32px; /* Space between D-Pad and Action buttons */
+            z-index: 1000;
+            padding: 12px 20px;
+            border-radius: 18px;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Styling for the virtual D-Pad */
+        .control-grid {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left center right"
+                ". down .";
+            width: 130px; /* Adjusted size */
+            height: 130px;
+            gap: 4px;
+        }
+
+        .control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--control-blue);
+            color: white;
+            font-size: 1.4rem;
+            border-radius: 8px;
+            user-select: none;
+            box-shadow: 0 4px var(--control-shadow);
+            transition: transform 0.1s, background-color 0.1s, box-shadow 0.1s;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            opacity: 0.9;
+        }
+
+        .control-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px var(--control-shadow);
+            background-color: rgba(93, 147, 211, 0.9);
+        }
+
+        /* Action Buttons (A/B) Styling */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 130px; /* Match D-pad height */
+        }
+        .action-btn {
+            width: 55px;
+            height: 55px;
+            font-family: monospace; /* Simple bold look */
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s, box-shadow 0.1s;
+            opacity: 0.95;
+        }
+        #btn-a {
+            background-color: var(--accent); /* Uses the accent color from :root (Pink) */
+            box-shadow: 0 3px #a31d60;
+        }
+        #btn-b {
+            background-color: #4CAF50; /* Green */
+            box-shadow: 0 3px #388e3c;
+        }
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+        #btn-a:active {
+            box-shadow: 0 1px #a31d60;
+        }
+        #btn-b:active {
+            box-shadow: 0 1px #388e3c;
+        }
+
+        /* Assign grid areas */
+        #up-btn    { grid-area: up; }
+        #down-btn  { grid-area: down; }
+        #left-btn  { grid-area: left; }
+        #right-btn { grid-area: right; }
+
+        /* Hide controls on desktop (screens wider than 900px) */
+        @media (min-width: 900px) {
+            .control-container {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
-  <div class="hud" role="status" aria-live="polite">
-    <div class="hud-top" style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
-      <div style="font-weight:600;">Toon Man Demo</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button class="hud-btn pause" title="Pause" aria-pressed="false" style="appearance:none;border:none;background:transparent;color:inherit;cursor:pointer;padding:4px 6px;border-radius:6px;">⏸</button>
-      </div>
+    <div class="hud">Toon Man Demo
+        <div>FPS: <span class="fps">0</span></div>
+        <div>Time: <span class="time">0:00</span></div>
+        <div>Score: <span class="score">0</span></div>
+    </div>
+    
+    <canvas id="game-canvas" width="1024" height="576"></canvas>
+
+    <!-- Controls Area (Virtual D-Pad and Action Buttons) -->
+    <div class="control-container">
+        <div class="control-grid">
+            <!-- Up (Mapped to Jump) -->
+            <button id="up-btn" class="control-btn" data-control-key="up">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </button>
+            <!-- Left -->
+            <button id="left-btn" class="control-btn" data-control-key="left">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l-7 7 7 7"/></svg>
+            </button>
+            <!-- Right -->
+            <button id="right-btn" class="control-btn" data-control-key="right">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l7 7-7 7"/></svg>
+            </button>
+            <!-- Down -->
+            <button id="down-btn" class="control-btn" data-control-key="down">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </button>
+        </div>
+
+        <div class="action-buttons">
+            <button id="btn-a" class="action-btn" data-control-key="actionA">A</button>
+            <button id="btn-b" class="action-btn" data-control-key="actionB">B</button>
+        </div>
     </div>
 
-    <div style="display:flex;gap:12px;margin-top:8px;align-items:center;font-size:13px;">
-      <div>FPS: <span class="fps">0</span></div>
-      <div>Time: <span class="time">0:00</span></div>
-      <div>Score: <span class="score">0</span></div>
-    </div>
+    <script>
+        // --- MOBILE INPUT STATE ---
+        // This state object tracks the status of the virtual D-Pad and Action buttons.
+        const controls = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            actionA: false,
+            actionB: false
+        };
 
-    <div style="display:flex;gap:12px;margin-top:8px;align-items:center;font-size:13px;">
-      <div>Lives: <span class="lives-count">3</span></div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <label for="health-bar" style="font-size:12px;">Health</label>
-        <progress id="health-bar" class="health-bar" value="100" max="100" style="width:120px;height:10px;border-radius:6px;overflow:hidden;">100%</progress>
-      </div>
-    </div>
-  </div>
-<canvas></canvas>
-<script src="index.js" defer></script>
+        /**
+         * Sets the control state to true (start press) and provides visual feedback.
+         * @param {string} direction - The control key ('up', 'left', 'actionA', etc.)
+         * @param {HTMLElement} btn - The button element.
+         */
+        function handleStart(direction, btn) {
+            controls[direction] = true;
+            if (direction.startsWith('action')) {
+                btn.style.opacity = '1.0';
+            }
+        }
+
+        /**
+         * Sets the control state to false (end press).
+         * @param {string} direction - The control key.
+         * @param {HTMLElement} btn - The button element.
+         */
+        function handleEnd(direction, btn) {
+            controls[direction] = false;
+            if (direction.startsWith('action')) {
+                btn.style.opacity = '0.95';
+            }
+        }
+
+        // Function to bind all events (Touch and Mouse) to a button
+        function setupButton(id, controlKey) {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+
+            // 1. Touch Events (Primary for Mobile)
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
+                handleStart(controlKey, btn);
+            });
+            btn.addEventListener('touchend', () => {
+                handleEnd(controlKey, btn);
+            });
+            btn.addEventListener('touchcancel', () => { 
+                handleEnd(controlKey, btn);
+            });
+
+            // 2. Mouse Events (Fallback for Desktop testing)
+            btn.addEventListener('mousedown', () => {
+                handleStart(controlKey, btn);
+            });
+            btn.addEventListener('mouseup', () => {
+                handleEnd(controlKey, btn);
+            });
+            btn.addEventListener('mouseleave', () => {
+                if (controls[controlKey]) {
+                    handleEnd(controlKey, btn);
+                }
+            });
+        }
+
+        // Initialize controls for all directions and actions
+        setupButton('up-btn', 'up');
+        setupButton('down-btn', 'down');
+        setupButton('left-btn', 'left');
+        setupButton('right-btn', 'right');
+        setupButton('btn-a', 'actionA');
+        setupButton('btn-b', 'actionB');
+
+        // --- GAME LOGIC START (FROM index.js) ---
+
+        // --- IMAGE DEFINITIONS ---
+        // NOTE: Since external file paths won't work in this environment, 
+        // these image files must exist in your local project setup for the game to work fully.
+        const playerImage = new Image();
+        playerImage.src = 'images/spriteStandRight.png';
+        const playerImage2 = new Image();
+        playerImage2.src = 'images/spriteRunRight.png';
+        const playerImage3 = new Image();
+        playerImage3.src = 'images/spriteRunLeft.png';
+        const playerImage4 = new Image();
+        playerImage4.src = 'images/spriteRunRight.png';
+        const playerImage5 = new Image();
+        playerImage5.src = 'images/spriteRunLeft.png';
+        const playerImage6 = new Image();
+        playerImage6.src = 'images/spriteStandLeft.png';
+        //const platformImage = new Image();
+        //platformImage.src = 'images/Pad_1_3.png';
+        const backgroundImage = new Image();
+        backgroundImage.src = 'images/City1.png';
+
+        // --- CANVAS SETUP ---
+        const canvas = document.getElementById('game-canvas');
+        /** @type {CanvasRenderingContext2D} */
+        const c = canvas.getContext('2d');
+        
+        // Setting canvas size is handled in HTML and window.onload for responsiveness, 
+        // but we'll keep the original target dimensions for the game world scale.
+        canvas.width = 1024;
+        canvas.height = 576;
+
+        const gravity = 1.5;
+
+        // --- ASSET LOADING AND GAME START ---
+
+        const imagesToLoad = {
+            idle: playerImage,
+            run: playerImage2,
+            runLeft: playerImage3,
+            jump: playerImage4,
+            jumpLeft: playerImage5,
+            idleLeft: playerImage6,
+            //platform: platformImage, // Platform image is commented out in source
+            background: backgroundImage
+        };
+
+        /** @type {{ 
+         * player: { [key: string]: HTMLImageElement | null }, 
+         * platform: HTMLImageElement | null, 
+         * background: HTMLImageElement | null 
+         * }} 
+         */
+        const assets = {
+            player: {
+                idle: null,
+                run: null,
+                runLeft: null,
+                jump: null,
+                jumpLeft: null,
+                idleLeft: null
+            },
+            platform: null,
+            background: null
+        };
+
+        let assetsLoadedCount = 0;
+        const totalAssets = Object.keys(imagesToLoad).length;
+
+        function startGame() {
+            assetsLoadedCount++;
+            if (assetsLoadedCount === totalAssets) {
+                // Only start the game loop when ALL assets are loaded!
+                init(); // Initialize objects
+                animate();
+            }
+        }
+
+        // Setup onload handlers for ALL images.
+        imagesToLoad.idle.onload = () => { assets.player.idle = imagesToLoad.idle; startGame(); };
+        imagesToLoad.run.onload = () => { assets.player.run = imagesToLoad.run; startGame(); };
+        imagesToLoad.runLeft.onload = () => { assets.player.runLeft = imagesToLoad.runLeft; startGame(); };
+        imagesToLoad.jump.onload = () => { assets.player.jump = imagesToLoad.jump; startGame(); };
+        imagesToLoad.jumpLeft.onload = () => { assets.player.jumpLeft = imagesToLoad.jumpLeft; startGame(); };
+        imagesToLoad.idleLeft.onload = () => { assets.player.idleLeft = imagesToLoad.idleLeft; startGame(); };
+        //imagesToLoad.platform.onload = () => { assets.platform = imagesToLoad.platform; startGame(); };
+        imagesToLoad.background.onload = () => { assets.background = imagesToLoad.background; startGame(); };
+
+
+        // --- GAME CLASSES ---
+
+        class Player {
+            constructor({
+                idleImage,
+                runImage,
+                runLeftImage,
+                jumpImage,
+                jumpLeftImage,
+                idleLeftImage
+            }) {
+                this.position = {
+                    x: 100,
+                    y: 100
+                };
+                this.velocity = {
+                    x: 0,
+                    y: 0
+                };
+                this.width = 66;
+                this.height = 150;
+                this.speed = 7;
+                this.jumpStrength = -25;
+                this.frames = 0;
+                
+                this.sprites = {
+                    idle: {
+                        right: idleImage,
+                        left: idleLeftImage,
+                        cropWidth: 177,
+                        width: 66
+                    },
+                    
+                    run: {
+                        right: runImage,
+                        left: runLeftImage,
+                        cropWidth: 341,
+                        width: 127.875
+                    },
+                    jump: {
+                        right: jumpImage,
+                        left: jumpLeftImage
+                    }
+                };
+                this.currentSprite = this.sprites.idle.right;
+                this.currentDirection = 'right';
+                this.currentCropWidth = 177;
+                
+                
+            }
+
+            draw() {
+                if (this.currentSprite) {
+                    c.drawImage(this.currentSprite,
+                        this.currentCropWidth * this.frames, 0, this.currentCropWidth, 400, // Source rectangle
+                        this.position.x, this.position.y, this.width, this.height);
+                }
+            }
+
+            update() {
+                this.frames ++ ;
+                if (this.frames > 59 && this.currentSprite === this.sprites.idle.right) 
+                    this.frames = 0
+                else if (this.frames > 29 && this.currentSprite === this.sprites.run.right)
+                    this.frames = 0
+                
+                this.draw();
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+
+                // Apply gravity, but stop at the bottom of the canvas
+                if (this.position.y + this.height + this.velocity.y <= canvas.height) {
+                    this.velocity.y += gravity;
+                } else {
+                    this.velocity.y = 0;
+                }
+
+                // --- Sprite Switching Logic ---
+                
+                const movingRight = keys.right.pressed || controls.right;
+                const movingLeft = keys.left.pressed || controls.left;
+
+                // 1. Determine direction
+                if (movingRight) {
+                    this.currentDirection = 'right';
+                    this.currentCropWidth = this.sprites.run.cropWidth;
+                    this.width = this.sprites.run.width;
+                } else if (movingLeft) {
+                    this.currentDirection = 'left';
+                    this.currentCropWidth = this.sprites.run.cropWidth;
+                    this.width = this.sprites.run.width;
+                }
+
+                // 2. Determine action (Jumping > Running > Idle)
+                if (this.velocity.y < 0) { // Going up (jumping)
+                    this.currentSprite = this.sprites.jump[this.currentDirection];
+                    this.currentCropWidth = this.sprites.run.cropWidth; 
+                    this.width = this.sprites.run.width; // Use idle dimensions for jump frame
+                    this.frames = 0;
+                } else if (this.velocity.y > 0) { // Falling (using jump sprite or run)
+                    this.currentSprite = this.sprites.run[this.currentDirection]; // Run sprite as fallback for fall
+                } else if (movingRight || movingLeft) { // On ground and moving
+                    this.currentSprite = this.sprites.run[this.currentDirection];
+                    this.currentCropWidth = this.sprites.run.cropWidth;
+                    this.width = this.sprites.run.width;
+                } else { // On ground and idle
+                    this.currentSprite = this.sprites.idle[this.currentDirection];
+                    this.currentCropWidth = this.sprites.idle.cropWidth;
+                    this.width = this.sprites.idle.width;
+                }
+            }
+        }
+
+        /*
+        class Platform {
+            // ... Platform class definition (commented out as per original)
+        }
+        */
+
+        class GenericObject {
+            constructor({
+                x,
+                y,
+                image,
+                width,
+                height
+            }) {
+                this.position = { x: x, y: y };
+                this.image = image;
+                this.width = width || image.width;
+                this.height = height || image.height;
+            }
+
+            draw() {
+                if (this.image) {
+                    c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+                }
+            }
+        }
+
+        // --- GLOBAL VARIABLES (Initialized later) ---
+        /** @type {Player} */
+        let player;
+        /** @type {Array<any>} */
+        let platforms = [];
+        /** @type {Array<GenericObject>} */
+        let genericObjects = [];
+
+        // Keys state for desktop input
+        const keys = {
+            right: { pressed: false },
+            left: { pressed: false },
+            up: { pressed: false } // Added 'up' for keyboard handling consistency
+        };
+        let scrollOffset = 0;
+
+        // --- INITIALIZATION FUNCTION ---
+        function init() {
+            // Passed all the loaded player sprites to the new Player
+            player = new Player({
+                idleImage: assets.player.idle,
+                runImage: assets.player.run,
+                runLeftImage: assets.player.runLeft,
+                jumpImage: assets.player.run,
+                jumpLeftImage: assets.player.runLeft,
+                idleLeftImage: assets.player.idleLeft
+            });
+
+            // FIX: Use the 'genericObjects' variable name
+            genericObjects = [
+                // Repeating background objects
+                new GenericObject({ x: 0, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 2, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 3, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 4, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 5, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 6, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 7, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 8, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 9, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 10, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+                new GenericObject({ x: canvas.width * 11, y: 0, image: assets.background, width: canvas.width, height: canvas.height }),
+            ];
+            
+            // Platforms are commented out in the original source, so array remains empty.
+            platforms = []; 
+        }
+
+
+        // --- GAME LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // CRITICAL: Clear the canvas on every frame.
+            c.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Combine desktop key input with mobile controls
+            const movingRight = keys.right.pressed || controls.right;
+            const movingLeft = keys.left.pressed || controls.left;
+            const tryingToJump = keys.up.pressed || controls.up;
+
+
+            // 1. Draw Background/Generic Objects FIRST
+            genericObjects.forEach(object => {
+                object.draw();
+            });
+
+            // 2. Draw Platforms
+            // platforms.forEach(platform => { platform.draw(); });
+
+            // 3. Update Player (this will also draw the player)
+            player.update();
+
+            // --- UNIFIED Movement/Scrolling Logic ---
+            
+            // Handle Jump
+            if (tryingToJump && player.velocity.y === 0) {
+                player.velocity.y = player.jumpStrength;
+                // Since controls.up is handled by touch end, this prevents re-jump while button held.
+            }
+            // Ensure controls.up is reset if we used a mobile press to jump
+            // if (controls.up && player.velocity.y < 0) controls.up = false; 
+
+            // 1. Handle Horizontal Movement (apply velocity)
+            if (movingRight && player.position.x < 400) {
+                player.velocity.x = player.speed;
+            } else if (
+                (movingLeft && player.position.x > 100) ||
+                (movingLeft && scrollOffset === 0 && player.position.x > 0)
+            ) {
+                player.velocity.x = -player.speed;
+            } else {
+                // Player is at the screen edge, so stop them
+                player.velocity.x = 0;
+
+                // 2. Handle Scrolling (move the world)
+                if (movingRight) {
+                    scrollOffset += player.speed;
+                    
+                    // platforms.forEach(platform => { platform.position.x -= player.speed; });
+                    
+                    // Move background (slower for parallax effect)
+                    genericObjects.forEach(object => {
+                        object.position.x -= player.speed * 0.66;
+                    });
+                } else if (movingLeft && scrollOffset > 0) {
+                    scrollOffset -= player.speed;
+                    
+                    // platforms.forEach(platform => { platform.position.x += player.speed; });
+                    
+                    // Move background
+                    genericObjects.forEach(object => {
+                        object.position.x += player.speed * 0.66;
+                    });
+                }
+            }
+
+            // --- Collision Detection ---
+            // platforms.forEach(platform => {
+            //     if (player.position.y + player.height <= platform.position.y &&
+            //         player.position.y + player.height + player.velocity.y >= platform.position.y &&
+            //         player.position.x + player.width >= platform.position.x &&
+            //         player.position.x <= platform.position.x + platform.width) {
+            //         player.velocity.y = 0;
+            //     }
+            // });
+
+            // --- Win/Lose Conditions ---
+            // Example Lose Condition (falling off map)
+            if (player.position.y > canvas.height) {
+                console.log('You lose. Restarting...');
+                // init(); 
+            }
+            
+            // Example Win Condition (reaching the end)
+            if (scrollOffset > 5000) { 
+                console.log('You win!');
+            }
+        }
+
+        // --- EVENT LISTENERS (Keyboard Only) ---
+        // Mobile controls are handled separately via the `controls` object state.
+        window.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    // This sets the key state. The actual jump happens in the animate loop.
+                    keys.up.pressed = true;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    keys.left.pressed = true;
+                    // Sprite changes are now handled in the player.update() loop based on key state
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    keys.right.pressed = true;
+                    // Sprite changes are now handled in the player.update() loop based on key state
+                    break;
+                case ' ': // Spacebar for action A
+                    controls.actionA = true;
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            switch (event.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    keys.up.pressed = false;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    keys.left.pressed = false;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    keys.right.pressed = false;
+                    break;
+                case ' ':
+                    controls.actionA = false;
+                    break;
+            }
+        });
+        
+        // --- GAME START ---
+        window.onload = function() {
+            // We initiate the asset loading process, which calls init() and animate() upon completion.
+            // NOTE: The game will not start the loop until all image assets are reported as loaded.
+        }
+    </script>
 </body>
-
 </html>
