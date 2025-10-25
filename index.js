@@ -1,21 +1,21 @@
 // --- IMAGE DEFINITIONS ---
 // (No changes here, these are all correct)
 const playerImage = new Image();
-playerImage.src = 'images/spriteStandRight.png';
+playerImage.src = '/images/spriteStandRight.png';
 const playerImage2 = new Image();
-playerImage2.src = 'images/spriteRunRight.png';
+playerImage2.src = '/images/spriteRunRight.png';
 const playerImage3 = new Image();
-playerImage3.src = 'images/spriteRunLeft.png';
+playerImage3.src = '/images/spriteRunLeft.png';
 const playerImage4 = new Image();
-playerImage4.src = 'images/spriteRunRight.png';
+playerImage4.src = '/images/spriteRunRight.png';
 const playerImage5 = new Image();
-playerImage5.src = 'images/spriteRunLeft.png';
+playerImage5.src = '/images/spriteRunLeft.png';
 const playerImage6 = new Image();
-playerImage6.src = 'images/spriteStandLeft.png';
+playerImage6.src = '/images/spriteStandLeft.png';
 //const platformImage = new Image();
 //platformImage.src = '/images/Pad_1_3.png';
 const backgroundImage = new Image();
-backgroundImage.src = 'images/City1.png';
+backgroundImage.src = '/images/City1.png';
 
 // --- CANVAS SETUP ---
 const canvas = document.querySelector('canvas');
@@ -689,5 +689,4 @@ window.addEventListener('keyup', (event) => {
             keys.right.pressed = false;
             break;
     }
-
 });
