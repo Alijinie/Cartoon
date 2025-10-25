@@ -5,17 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Toon Man</title>
   <style>
-    body {
-      margin: 0;
-      background-color: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    :root{
+      --bg1: #0f0c29;
+      --bg2: #302b63;
+      --accent: #ff2d95;
+      --glass: rgba(255,255,255,0.04);
     }
-  </style>
+
+    /* Page */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background:
+      radial-gradient(1200px 600px at 10% 10%, rgba(255,45,149,0.06), transparent 8%),
+      radial-gradient(800px 400px at 90% 90%, rgba(50,150,255,0.03), transparent 8%),
+      linear-gradient(135deg, var(--bg1), var(--bg2));
+      background-size: 300% 300%;
+      animation: bgShift 18s ease-in-out infinite;
+      overflow: hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* subtle starfield / grain */
+    body::before{
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+      radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.12), transparent),
+      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.07), transparent),
+      radial-gradient(1px 1px at 80% 40%, rgba(255,255,255,0.06), transparent);
+      opacity: 0.08;
+      mix-blend-mode: screen;
+      animation: twinkle 6s linear infinite;
+    }
+
+    /* Canvas styling */
+    canvas {
+      display: block;
+      width: min(92vw, 1100px);
+      height: auto;
+      aspect-ratio: 16 / 9;
+      max-height: calc(100vh - 48px);
+      border-radius: 18px;
+      border: 2px solid rgba(255,255,255,0.06);
+      background:
+      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18)),
+      repeating-linear-gradient(transparent, transparent 6px, rgba(0,0,0,0.06) 7px),
+      linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      background-blend-mode: overlay, multiply, normal;
+      background-size: cover, 100% 14px, cover;
+      box-shadow:
+      0 20px 40px rgba(2,6,23,0.6),
+      0 0 40px rgba(255,45,149,0.06),
+      inset 0 -8px 40px rgba(0,0,0,0.45);
+      image-rendering: optimizeSpeed;
+      image-rendering: pixelated; /* good for retro sprite art */
+      transform: translateZ(0);
+      transition: transform 240ms cubic-bezier(.2,.9,.2,1), box-shadow 240ms;
+      cursor: crosshair;
+    }
+
+    /* Hover / active */
+    canvas:hover {
+      transform: scale(1.02);
+      box-shadow:
+      0 26px 60px rgba(2,6,23,0.7),
+      0 0 90px rgba(255,45,149,0.14),
+      inset 0 -12px 60px rgba(0,0,0,0.5);
+    }
+    canvas:active {
+      transform: scale(0.995);
+    }
+
+    /* subtle neon rim when focused (keyboard / accessibility) */
+    canvas:focus {
+      outline: none;
+      box-shadow: 0 0 0 6px rgba(255,45,149,0.06), 0 22px 50px rgba(2,6,23,0.75);
+    }
+
+    /* Small decorative HUD top-left */
+    body > .hud {
+      position: fixed;
+      left: 18px;
+      top: 18px;
+      color: rgba(255,255,255,0.88);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+      border: 1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(6px) saturate(120%);
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      pointer-events: none;
+    }
+
+    /* Keyframes */
+    @keyframes bgShift {
+      0%   { background-position: 0% 0%; }
+      50%  { background-position: 100% 100%; }
+      100% { background-position: 0% 0%; }
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.06; transform: translateY(0); }
+      50% { opacity: 0.12; transform: translateY(-2px); }
+    }
+    </style>
 </head>
 <body>
+  <div class="hud" role="status" aria-live="polite">
+    <div class="hud-top" style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+      <div style="font-weight:600;">Toon Man Demo</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="hud-btn pause" title="Pause" aria-pressed="false" style="appearance:none;border:none;background:transparent;color:inherit;cursor:pointer;padding:4px 6px;border-radius:6px;">⏸</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:8px;align-items:center;font-size:13px;">
+      <div>FPS: <span class="fps">0</span></div>
+      <div>Time: <span class="time">0:00</span></div>
+      <div>Score: <span class="score">0</span></div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:8px;align-items:center;font-size:13px;">
+      <div>Lives: <span class="lives-count">3</span></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <label for="health-bar" style="font-size:12px;">Health</label>
+        <progress id="health-bar" class="health-bar" value="100" max="100" style="width:120px;height:10px;border-radius:6px;overflow:hidden;">100%</progress>
+      </div>
+    </div>
+  </div>
 <canvas></canvas>
 <script src="index.js"></script>
 </body>
