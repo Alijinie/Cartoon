@@ -1,0 +1,294 @@
+// --- IMAGE DEFINITIONS ---
+
+const playerImage = new Image();
+playerImage.src = '/images/Idle.png';
+const playerImage2 = new Image();
+playerImage2.src = '/images/Run.png'; 
+const playerImage3 = new Image();
+playerImage3.src = '/images/Runleft.png';
+const playerImage4 = new Image();
+playerImage4.src = '/images/Jump.png';
+const playerImage5 = new Image();
+playerImage5.src = '/images/JumpLeft.png';
+const playerImage6 = new Image();
+playerImage6.src = '/images/Idleleft.png';
+const platformImage = new Image();
+platformImage.src = '/images/Pad_1_3.png';
+
+const backgroundImage = new Image();
+backgroundImage.src = '/images/City1.png';
+
+// --- CANVAS SETUP ---
+const canvas = document.querySelector('canvas');
+const c = canvas.getContext('2d');
+canvas.width = 1024;
+canvas.height = 576;
+
+const gravity = 1.5;
+
+// --- ASSET LOADING AND GAME START ---
+/** @type {{ platform: HTMLImageElement | null, background: HTMLImageElement | null }} */
+const assets = {
+    platform: null,
+    background: null,
+    player: null
+};
+
+let assetsLoadedCount = 0;
+const totalAssets = 3; // Waiting for 3 images
+
+function startGame() {
+    assetsLoadedCount++;
+    if (assetsLoadedCount === totalAssets) {
+        // Only start the game loop when ALL assets are loaded!
+        init(); // Initialize objects
+        animate(); 
+    }
+}
+
+// Set up onload handlers
+platformImage.onload = () => {
+    assets.platform = platformImage;
+    startGame();
+};
+
+backgroundImage.onload = () => {
+    assets.background = backgroundImage;
+    startGame();
+};
+playerImage.onload = () => {
+    assets.player = playerImage;
+    startGame();
+};
+
+// --- GAME CLASSES ---
+
+class Player {
+    constructor () {
+        this.position = { x: 0, y: 300 };
+        this.velocity = { x: 0, y: 0 };
+        this.width = 200;
+        this.height = 400;
+        this.image = playerImage;
+    }
+    draw () {
+       if (this.image) {
+            c.drawImage(this.image, 
+              0, 0, 177, 400, // Source rectangle
+              this.position.x, this.position.y, this.width, this.height);
+       }
+    }
+    update () {
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+        if (this.position.y + this.height + this.velocity.y <= canvas.height) {
+            this.velocity.y += gravity;
+        } else {
+            this.velocity.y = 0;
+        }
+    }
+}
+
+class Platform {
+    constructor ({x, y, image} = {x: 0, y: 0, image: null}) {
+        this.position = { x: x, y: y };
+        // Use the image passed in (which is the loaded image object)
+        this.image = image;
+        // Use image width/height or set defaults/calculated sizes
+        this.width = image ? image.width : 200; 
+        this.height = image ? image.height : 20;
+    }
+    
+    draw () {
+        if (this.image) {
+            c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        } else {
+            c.fillStyle = 'blue';
+            c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        }
+    }
+}
+
+class GenericObject {
+    constructor ({x, y, image, width, height}) { // Added width/height for backgrounds
+        this.position = { x: x, y: y };
+        this.image = image;
+        this.width = width || image.width; 
+        this.height = height || image.height;
+    }
+    
+    draw () {
+        if (this.image) {
+            c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        }
+    }
+}
+
+// --- GLOBAL VARIABLES (Initialized later) ---
+let player;
+let platforms;
+let genericObject;
+
+const keys = {
+    right: { pressed: false },
+    left: { pressed: false }
+};
+let scrollOffset = 0;
+
+// --- INITIALIZATION FUNCTION ---
+function init() {
+    player = [new Player()][0];
+    
+    // Instantiate Generic Objects (Backgrounds) using the loaded asset
+    genericObject = [
+        new GenericObject({
+            x: 0,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,    // Stretch to canvas width
+            height: canvas.height   // Stretch to canvas height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width * 2,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width * 3,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width * 4,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width * 5,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width * 6,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        }),
+        new GenericObject({
+            x: 0 + canvas.width * 7,
+            y: 0,
+            image: assets.background,
+            width: canvas.width,
+            height: canvas.height
+        })
+    ];
+
+    // Instantiate Platforms using the loaded asset
+    platforms = [
+        new Platform({ x: -1, y: 470, image: assets.platform }), 
+        new Platform({ x: 500, y: 470, image: assets.platform }), 
+        new Platform({ x: 300, y: 600, image: assets.platform }), 
+        new Platform({ x: 700, y: 300, image: assets.platform }),
+        new Platform({ x: 1000, y: 400, image: assets.platform }),
+        new Platform({ x: 1300, y: 500, image: assets.platform }),
+        new Platform({ x: 1600, y: 350, image: assets.platform }),
+        new Platform({ x: 1900, y: 450, image: assets.platform }),
+        new Platform({ x: 2200, y: 550, image: assets.platform }),
+        new Platform({ x: 2500, y: 400, image: assets.platform })
+    ];
+}
+
+
+// --- GAME LOOP ---
+function animate () {
+    requestAnimationFrame(animate);
+    
+    // 1. Draw Background/Generic Objects FIRST
+    genericObject.forEach(object => {
+        object.draw();
+    });
+    
+    // 2. Draw Platforms (Foreground elements)
+    platforms.forEach(platform => {
+        platform.draw();
+    });
+    
+    // 3. Update Player
+    player.update();
+
+    
+    // --- Movement/Scrolling Logic ---
+    if (keys.right.pressed && player.position.x < 480 - player.width) {
+        player.position.x += 5;
+    } else if ((keys.left.pressed && player.position.x > 100) || (keys.left.pressed && scrollOffset === 0 && player.position.x > 0)) {
+        player.position.x -= 5;
+    } else {
+        player.velocity.x = 0;
+        if (keys.right.pressed) {
+            scrollOffset += 5;
+            platforms.forEach(platform => { platform.position.x -= 5; });
+            // 🆕 SCROLL BACKGROUND/GENERIC OBJECTS
+            genericObject.forEach(object => { object.position.x -= 3; }); // Slower for parallax effect
+        } else if (keys.left.pressed && scrollOffset > 0) {
+            scrollOffset -= 5;
+            platforms.forEach(platform => { platform.position.x += 5; });
+            // 🆕 SCROLL BACKGROUND/GENERIC OBJECTS
+            genericObject.forEach(object => { object.position.x += 3; }); 
+        }
+    }
+    
+    // --- Collision Detection ---
+    platforms.forEach(platform => {
+        if (player.position.y + player.height <= platform.position.y &&
+            player.position.y + player.height + player.velocity.y >= platform.position.y &&
+            player.position.x + player.width >= platform.position.x &&
+            player.position.x <= platform.position.x + platform.width) {
+                player.velocity.y = 0;
+        }
+    });
+    
+   
+}
+
+// --- EVENT LISTENERS ---
+window.addEventListener('keydown', (event) => { 
+    switch (event.key) {
+        case 'ArrowUp':
+            player.velocity.y = -20;
+            break;
+        case 'ArrowLeft':
+            keys.left.pressed = true;
+            break;
+        case 'ArrowRight':
+            keys.right.pressed = true;
+            break;
+    }
+});
+
+window.addEventListener('keyup', (event) => {
+    switch (event.key) {
+        case 'ArrowLeft':
+            keys.left.pressed = false;
+            break;
+        case 'ArrowRight':
+            keys.right.pressed = false;
+            break;
+    }
+});
